@@ -1,0 +1,76 @@
+// Zero Based Indexing.
+class SGTree{
+    vll v,seg;
+    public:
+    SGTree(ll n)
+    {
+        ll x;
+        for(ll i=0;i<n;i++)
+        {
+            cin>>x;
+            v.pb(x);
+        }
+        seg.resize(4*n+1);
+    }
+
+    void build(ll curr, ll low, ll high)
+    {
+        if(low==high)
+        {
+            seg[curr]=v[low];
+            return;
+        }
+        ll mid = (low + high)/2;
+        build((2*curr+1),low,mid);
+        build((2*curr+2),(mid+1),high);
+
+        //Use as per question. If max is asked,write max. If sum is asked,write sum.
+        seg[curr] = min(seg[2*curr+1],seg[2*curr+2]); // for min.
+    }
+
+    ll query(ll curr, ll l, ll r, ll low, ll high)
+    {
+        //no overlap.
+        // [l r low high]  OR  [low high l r].
+        if((high<l) || (low>r))
+        {
+            //If asked for max then return INT_MIN.
+            //If asked for sum then return 0.
+            return INT_MAX;
+        }
+
+        //complete overlap
+        // [l low high r]
+        else if((l<=low)&&(high<=r))
+        {
+            return seg[curr];
+        }
+
+        //partial overlap
+        else
+        {
+            ll mid = (low + high)/2;
+            ll num1 = query((2*curr+1),l,r,low,mid);
+            ll num2 = query((2*curr+2),l,r,(mid+1),high);
+            
+            //If asked max,return max. If asked sum, return sum;
+            return min(num1,num2);
+        }
+    }
+
+    void update(ll curr, ll low, ll high, ll reqind, ll reqval)
+    {
+        if(low==high)
+        {
+            seg[curr]=reqval;
+            return;
+        }
+        
+        ll mid = (low + high)/2;
+        if(reqind<=mid) update((2*curr+1),low,mid,reqind,reqval);
+        else if(reqind>mid) update((2*curr+2),(mid+1),high,reqind,reqval);
+        
+        //If max asked, use max. If sum asked, then add.
+        seg[curr] = min(seg[2*curr+1],seg[2*curr+2]);
+    }
+};
